@@ -2,67 +2,70 @@
 use List::Util 'shuffle', 'min', 'max';
 
 sub pass_or_fail {
-	if (scalar(@_) != 2){print "ERROR", return 1;}
+	if (scalar(@_) != 2){print("ERROR"); return 1;}
 
 	$input = $NUM;
 	my $result = @_[0];
-	print "@_[1]";
+	print_out_logged("@_[1]");
 
-	if ($input <= 3) {
+	if ($input == 3) {
 		if ($result <= 3){
-			print "\033[32;1mPASS\033[0m\n";
+			print_out_logged("\033[32;1mPASS\033[0m");
 		}
 		else {
-			print "\033[31;1mFAIL\033[0m\n";
+			print_out_logged("\033[31;1mFAIL\033[0m");
 		}
 	}
-	elsif ($input <= 5) {
+	elsif ($input == 5) {
 		if ($result <= 12){
-			print "\033[32;1mPASS\033[0m\n";
+			print_out_logged("\033[32;1mPASS\033[0m");
 		}
 		else {
-			print "\033[31;1mFAIL\033[0m\n";
+			print_out_logged("\033[31;1mFAIL\033[0m");
 		}
 	}
-	elsif ($input <= 100) {
+	elsif ($input == 100) {
 		if ($result <= 700) {
-			print "\033[32;1m5 points\033[0m\n";
+			print_out_logged("\033[32;1m5 points\033[0m");
 		}
 		elsif ($result <= 900) {
-			print "\033[32;1m4 points\033[0m\n";
+			print_out_logged("\033[32;1m4 points\033[0m");
 		}
 		elsif ($result <= 1100) {
-			print "\033[33;1m3 points\033[0m\n";
+			print_out_logged("\033[33;1m3 points\033[0m");
 		}
 		elsif ($result <= 1300) {
-			print "\033[33;1m2 points\033[0m\n";
+			print_out_logged("\033[33;1m2 points\033[0m");
 		}
 		elsif ($result <= 1500) {
-			print "\033[31;1m1 points\033[0m\n";
+			print_out_logged("\033[31;1m1 points\033[0m");
 		}
 		else {
-			print "\033[31;1mFAIL\033[0m\n";
+			print_out_logged("\033[31;1mFAIL\033[0m");
 		}
 	}
-	elsif ($input <= 500) {
+	elsif ($input == 500) {
 		if ($result <= 5500) {
-			print "\033[32;1m5 points\033[0m\n";
+			print_out_logged("\033[32;1m5 points\033[0m");
 		}
 		elsif ($result <= 7000) {
-			print "\033[32;1m4 points\033[0m\n";
+			print_out_logged("\033[32;1m4 points\033[0m");
 		}
 		elsif ($result <= 8500) {
-			print "\033[33;1m3 points\033[0m\n";
+			print_out_logged("\033[33;1m3 points\033[0m");
 		}
 		elsif ($result <= 10000) {
-			print "\033[33;1m2 points\033[0m\n";
+			print_out_logged("\033[33;1m2 points\033[0m");
 		}
 		elsif ($result <= 11500) {
-			print "\033[31;1m1 points\033[0m\n";
+			print_out_logged("\033[31;1m1 points\033[0m");
 		}
 		else {
-			print "\033[31;1mFAIL\033[0m\n";
+			print_out_logged("\033[31;1mFAIL\033[0m");
 		}
+	}
+	else{
+		print_out_logged("\033[0m\033[37;2m-\033[0m");
 	}
 }
 
@@ -70,24 +73,26 @@ sub print_stats {
 	$n = scalar(@_);
 	$sum = 0;
 	if ($n == 0) {
-		print "Number List Empty, \$n == 0\n"; exit (1);
+		print("Number List Empty, \$n == 0\n"); exit (1);
 	}
 	foreach $item (@_) {
 		$sum += $item;
 	}
 	$average = $sum / $n;
-	print "\r\033[34;1m"." " x 300 ."\r";
 	$/ = ' ';
 	$min = min(@_); $min =~ s/\n//g;
 	$max = max(@_); $max =~ s/\n//g;
-	print "INPUT : ".$NUM."\nMin "."$min"."\nMax "."$max"."\nAverage : $average\033[0m\n";
+	print_out_logged("\n\033[34;1mInput Size : ".$NUM."\nMin "."$min"."\nMax "."$max"."\nAverage : $average\033[0m\n");
 
 	$input = $NUM;
-	print "Pass or Fail ?\n";
+	print_out_logged("\n\033[33;1mPass or Fail ?\033[0m\n");
 	pass_or_fail($max, "Max : ");
+	print_out_logged("\n");
 	pass_or_fail($average, "Average : ");
+	print_out_logged("\n");
 
 }
+
 sub gen_list {
 	$Max = $NUM;
 	# $RndMax = $Max * 10;
@@ -106,6 +111,7 @@ sub gen_list {
 		}
 	}
 }
+
 sub	list_check_sorted {
 	my $not_sorted = 0;
 	for ($i = 0; $i < ((scalar @numbers) - 1); $i++) {
@@ -115,6 +121,7 @@ sub	list_check_sorted {
 	}
 	return ($not_sorted)
 }
+
 sub generate_numbers {
 	gen_list();
 	while (list_check_sorted()) {
@@ -127,19 +134,60 @@ if ((scalar @ARGV) != 2)
 	exit 0;
 }
 
+sub print_out_logged {
+	$string = sprintf(shift, @_ );
+	print($string);
+	$string =~ s/\x1b\[[0-9;]*m//g;
+	print(LOGFILE $string);
+}
+
+sub print_wait_anim {
+	if ($test % $width == 0 && $test != 0){
+		$direction++;
+		if ($direction > 3){$direction = 0;}
+	}
+	if ($direction == 0) {
+		$pad_left = ($test % $width) - $width;
+		$progress = $width + ($test % $width) - $width;
+		$pad_right = $width - ($test % $width);
+	}
+	elsif ($direction == 1) {
+		$pad_left = ($test % $width);
+		$progress = $width - ($test % $width);
+		$pad_right = $pad_left - $width;
+	}
+	elsif ($direction == 2) {
+		$pad_left = $width - ($test % $width);
+		$progress = ($test % $width);
+		$pad_right = 0;
+	}
+	elsif ($direction == 3) {
+		$pad_left = ($test % $width) - $width;
+		$progress = $width - ($test % $width);
+		$pad_right = $width + ($test % $width) - $width;
+	}
+
+
+	print("["."\033[0m\033[37;2m>" x $pad_left ."\033[0m\033[32;1m#" x $progress."\033[0m\033[37;2m<" x $pad_right."\033[0m] ");
+	# print("\tW $width L $pad_left  P $progress R $pad_right D $direction\n");
+}
+
 $NUM = @ARGV[0];
 $NUM_TEST = @ARGV[1];
-print "\033[s";
 
-my @wait = (	".    ", "..   ", "...  ", ".... " , ".....", " ....", "  ...", "   ..", "    .",
-				"     ", "    .", "   ..", "  ...", " ....", ".....", ".... ", "...  ", "..   ");
+$logfilename = ".push_swap_test_results.log";
+open(LOGFILE, ">".$logfilename) or die "\033[31;1mError\nCannot create ".$logfilename."\033[0m\n";
+
+$direction = 0;
 for ($test = 0; $test < $NUM_TEST; $test++)
 {
-	print "\033[u\033[\033[3".(2 + ($test / ($NUM_TEST / 10)) % 3).";1mGetting results \033[0m".($test + 1)."/".$NUM_TEST." \033[32;1m".@wait[(($test / ($NUM_TEST / 25)) % @wait)]."\033[0m ";
+	$width = 6 + $NUM_TEST / 500;
+	if ($width > 50) {$width = 50;};
+	print_wait_anim();
+	print_out_logged("\033[3".(2 + ($test % 3)).";1m[%-4d / %4d]", ($test + 1), $NUM_TEST);
+
 	@numbers = ( );
 	generate_numbers();
-
-	# print "@numbers"." " x 300 ."";
 
 	$cmd = "timeout 15 ./push_swap ".join(' ', @numbers)." | ./checker ".join(' ', @numbers);
 	$res = `$cmd`;
@@ -150,5 +198,14 @@ for ($test = 0; $test < $NUM_TEST; $test++)
 	$cmd = "./push_swap ".join(' ', @numbers)." | wc -l";
 	$res = `$cmd`;
 	push(@results, $res);
+
+	$res =~ s/\n//g;
+	print_out_logged(" Instr %6d", $res);
+	pass_or_fail($res, "\033[0m ? ");
+	print(LOGFILE " @numbers");
+	print_out_logged("\r");
 }
 print_stats(@results);
+close(LOGFILE) or die "\033[31;1mError\nCannot close ".$logfilename."\033[0m\n";
+
+print("\nMore details : \n\033[34;1m$logfilename\033[0m\n");
